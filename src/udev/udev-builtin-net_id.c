@@ -390,8 +390,10 @@ static int dev_pci_slot(struct udev_device *dev, struct netnames *names) {
         if (hotplug_slot > 0) {
                 s = names->pci_slot;
                 l = sizeof(names->pci_slot);
-                if (domain > 0)
-                        l = strpcpyf(&s, l, "P%d", domain);
+                /* Hyper-V uses 32 bit PCI domain's with high bits
+                 * set to random value to distiquish from pass through PCI domains. */
+                if (domain > 0 && domain < UINT16_MAX)
+                        l = strpcpyf(&s, l, "P%u", domain);
                 l = strpcpyf(&s, l, "s%d", hotplug_slot);
                 if (func > 0 || is_pci_multifunction(names->pcidev))
                         l = strpcpyf(&s, l, "f%d", func);
